@@ -9,7 +9,7 @@ website documentation pages.
 Requires Node.js **22.12 or newer** and **pnpm**. Run commands from the repository root:
 
 ```sh
-pnpm install
+pnpm install --frozen-lockfile
 pnpm dev
 ```
 
@@ -20,8 +20,6 @@ The development server runs at `http://localhost:4321`.
 | `pnpm build` | Build the static site into `dist/` |
 | `pnpm preview` | Preview the production build locally |
 | `pnpm astro check` | Run Astro and TypeScript diagnostics |
-
-Once a lockfile is committed, use `pnpm install --frozen-lockfile` for reproducible installs.
 
 ## Project structure
 
