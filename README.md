@@ -68,6 +68,18 @@ Failed runs retain traces in `test-results/`. Open a trace with:
 pnpm exec playwright show-trace test-results/<test-directory>/trace.zip
 ```
 
+## CI and deployment
+
+GitHub Actions runs website checks and browser tests on pushes and pull requests.
+A separate workflow lints Markdown files with rumdl.
+
+Each push to `main` deploys after the website checks pass. The workflow builds
+for `https://chessvaultdotapp.github.io` and publishes `dist/` to the `main` branch
+of `chessvaultdotapp/chessvaultdotapp.github.io`.
+The source repository needs a `GH_PAGES_DEPLOY_TOKEN` secret with contents-write
+access to that destination. Configure GitHub Pages in the destination repository
+to publish from the root of `main`.
+
 ## License
 
 See [LICENSE](LICENSE).

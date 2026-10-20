@@ -1,0 +1,39 @@
+name: Actionlint
+
+on:
+  push:
+    paths: &workflow-paths
+      - '.github/workflows/**'
+      - '.github/actions/**'
+  pull_request:
+    paths: *workflow-paths
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Check workflows
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.3'
+          cache: false
+
+      - name: Check workflows
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.11 -shellcheck= -pyflakes=
+
+      - name: Check rumdl installer syntax
+        run: bash -n .github/actions/setup-rumdl/install.sh
