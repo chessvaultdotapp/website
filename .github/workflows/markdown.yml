@@ -6,7 +6,6 @@ on:
       - '**/*.md'
       - '.rumdl.toml'
       - '.github/workflows/markdown.yml'
-      - '.github/actions/setup-rumdl/**'
   pull_request:
     paths: *markdown-paths
   workflow_dispatch:
@@ -29,7 +28,7 @@ jobs:
           persist-credentials: false
 
       - name: Install rumdl
-        uses: ./.github/actions/setup-rumdl
+        uses: chessvaultdotapp/actions-setup-rumdl@86f98314bd9485b425dc242c520a1df276f842e6
 
       - name: Check tracked Markdown files
         run: git ls-files -z '*.md' | xargs -0 -r rumdl check
