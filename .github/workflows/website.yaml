@@ -57,6 +57,9 @@ jobs:
       - name: Check Astro diagnostics and types
         run: pnpm astro check
 
+      - name: Test changelog integration
+        run: pnpm test:unit
+
       - name: Install Chromium for smoke tests
         run: pnpm exec playwright install --with-deps chromium
 
