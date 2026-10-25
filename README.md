@@ -53,6 +53,11 @@ pnpm exec oxlint --deny-warnings src astro.config.mjs playwright.config.ts tests
 pnpm astro check
 ```
 
+### Changelog tests
+
+Run `pnpm test:unit` for offline changelog integration tests using temporary fixtures.
+These tests require Git and run in CI before the browser tests.
+
 ### Browser tests
 
 Install Chromium, then run the Playwright suite:
