@@ -36,6 +36,16 @@ import Separator from "./Separator.astro";
 </header>
 
 <script>
+  const header = document.querySelector("header");
+  const updateScrollState = () => header?.classList.toggle("scrolled", window.scrollY > 0);
+  updateScrollState();
+  window.addEventListener("scroll", updateScrollState, { passive: true });
+  if (header) {
+    new ResizeObserver(() => {
+      document.documentElement.style.setProperty("--header-height", `${header.getBoundingClientRect().height}px`);
+    }).observe(header);
+  }
+
   const button = document.querySelector<HTMLButtonElement>("#theme-preference");
   const themes = ["light", "dark", "system"];
 
@@ -61,13 +71,33 @@ import Separator from "./Separator.astro";
 <style>
   header {
     flex-shrink: 0;
-    width: 100%;
-    max-width: 70rem;
-    margin-inline: auto;
-    padding-block: 0.5rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    width: calc(100% + 2rem);
+    margin: -1rem -1rem 1rem;
+    padding: 1rem;
+    background: var(--color-background);
+    box-shadow: 0 4px 12px transparent;
+    transition:
+      background-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  header.scrolled {
+    background: var(--color-surface-elevated);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-text) 12%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    header {
+      transition: none;
+    }
   }
 
   nav {
+    max-width: 70rem;
+    margin-inline: auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -91,6 +121,7 @@ import Separator from "./Separator.astro";
   }
 
   .nav-button {
+    color: var(--color-text);
     display: inline-flex;
     align-items: center;
     min-height: 2.75rem;
@@ -116,6 +147,7 @@ import Separator from "./Separator.astro";
   }
 
   .github-link {
+    color: var(--color-text);
     display: grid;
     place-items: center;
     width: 2.75rem;
