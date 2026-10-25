@@ -4,12 +4,11 @@ import { pathToFileURL } from "node:url";
 import { resolve } from "node:path";
 import { createMarkdownProcessor } from "@astrojs/markdown-remark";
 import Layout from "../layouts/Layout.astro";
-import Badge from "../components/Badge.astro";
+import ReleaseEntry from "../components/ReleaseEntry.astro";
 import pin from "../../changelogs.json";
 
 // Chessvault's published previews use a week-based build suffix.
 const isPreview = (version: string) => /\+\d{2}w\d{2}[a-z]+$/.test(version);
-
 const directory = pathToFileURL(`${resolve(".cache/chessvault")}/`);
 let validated;
 try {
@@ -22,7 +21,6 @@ if (validated.commit !== pin.commit || validated.tag !== pin.tag) {
 }
 const renderer = await createMarkdownProcessor();
 const files = (await readdir(new URL("changelogs/", directory))).filter((file) => file.endsWith(".md"));
-// Preview suffixes sort after their base stable version; newest versions appear first.
 files.sort((a, b) => b.localeCompare(a, "en", { numeric: true }));
 const entries = await Promise.all(
   files.map(async (file) => {
@@ -32,38 +30,50 @@ const entries = await Promise.all(
     return { version, code };
   }),
 );
+// These historical v0.0.0 previews led up to the first stable release.
+const historical = entries.filter(({ version }) => version.startsWith("v0.0.0+") && isPreview(version));
+const current = entries.filter((entry) => !historical.includes(entry));
 ---
 
 <Layout title="Changelog | Chessvault">
   <div class="changelog">
     <h1>Changelog</h1>
     <p>Release notes for Chessvault, including published development previews.</p>
-    <nav aria-label="Changelog versions">
-      <ul>
-        {entries.map(({ version }) => (
-          <li>
-            <a href={`#${version}`}>{version}</a>
-            <Badge variant={isPreview(version) ? "info" : "success"}>{isPreview(version) ? "Preview" : "Stable"}</Badge>
-          </li>
-        ))}
-      </ul>
-    </nav>
-    {entries.map(({ version, code }) => (
-      <article id={version}>
-        <div class="release-heading">
-          <h2>{version}</h2>
-          <Badge variant={isPreview(version) ? "info" : "success"}>{isPreview(version) ? "Preview" : "Stable"}</Badge>
-        </div>
-        <p>
-          <a href={`https://github.com/chessvaultdotapp/chessvault/releases/tag/${encodeURIComponent(version)}`}>
-            View release on GitHub
-          </a>
-        </p>
-        <div class="release-notes" set:html={code} />
-      </article>
+    {current.map((entry) => (
+      <>
+        <ReleaseEntry {...entry} />
+        {entry.version === "v0.1.0" && historical.length > 0 && (
+          <details id="historical-previews">
+            <summary>Development previews ({historical.length})</summary>
+            {historical.map((preview) => (
+              <ReleaseEntry {...preview} />
+            ))}
+          </details>
+        )}
+      </>
     ))}
   </div>
 </Layout>
+
+<script>
+  // Open collapsed notes for navigation links and direct/bookmarked URLs.
+  const revealRelease = () => {
+    let id;
+    try {
+      id = decodeURIComponent(location.hash.slice(1));
+    } catch {
+      return;
+    }
+    const target = document.getElementById(id);
+    const details = target?.closest("details");
+    if (details && target) {
+      details.open = true;
+      target.scrollIntoView();
+    }
+  };
+  window.addEventListener("hashchange", revealRelease);
+  revealRelease();
+</script>
 
 <style>
   .changelog {
@@ -72,32 +82,15 @@ const entries = await Promise.all(
     margin-inline: auto;
     overflow-wrap: anywhere;
   }
-  .release-heading {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+  summary {
+    cursor: pointer;
+    padding-block: 0.5rem;
+    font-weight: 700;
   }
-  nav li :global(.badge) {
-    margin-inline-start: 0.5rem;
-  }
-  article {
-    margin-block: 3rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--color-border);
-    scroll-margin-top: 1rem;
-  }
-  .release-notes :global(h2) {
-    font-size: 1.25rem;
-  }
-  .release-notes :global(li) {
-    margin-block: 0.5rem;
-  }
-  .release-notes :global(pre) {
-    overflow-x: auto;
-    padding: 1rem;
-  }
-  .release-notes :global(img) {
-    max-width: 100%;
+  #historical-previews {
+    background: var(--color-surface-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
   }
 </style>
