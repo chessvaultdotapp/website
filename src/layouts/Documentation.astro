@@ -61,8 +61,8 @@ const currentPath = Astro.url.pathname.replace(/\/$/, "");
 
   .sidebar {
     position: sticky;
-    top: 1rem;
-    max-height: calc(100svh - 2rem);
+    top: calc(var(--header-height, 10rem) + 2rem);
+    max-height: calc(100svh - var(--header-height, 10rem) - 3rem);
     overflow-y: auto;
     overflow-wrap: anywhere;
     margin-block: 1rem 2rem;
