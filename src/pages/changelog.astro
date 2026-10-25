@@ -4,7 +4,11 @@ import { pathToFileURL } from "node:url";
 import { resolve } from "node:path";
 import { createMarkdownProcessor } from "@astrojs/markdown-remark";
 import Layout from "../layouts/Layout.astro";
+import Badge from "../components/Badge.astro";
 import pin from "../../changelogs.json";
+
+// Chessvault's published previews use a week-based build suffix.
+const isPreview = (version: string) => /\+\d{2}w\d{2}[a-z]+$/.test(version);
 
 const directory = pathToFileURL(`${resolve(".cache/chessvault")}/`);
 let validated;
@@ -39,13 +43,17 @@ const entries = await Promise.all(
         {entries.map(({ version }) => (
           <li>
             <a href={`#${version}`}>{version}</a>
+            <Badge variant={isPreview(version) ? "info" : "success"}>{isPreview(version) ? "Preview" : "Stable"}</Badge>
           </li>
         ))}
       </ul>
     </nav>
     {entries.map(({ version, code }) => (
       <article id={version}>
-        <h2>{version}</h2>
+        <div class="release-heading">
+          <h2>{version}</h2>
+          <Badge variant={isPreview(version) ? "info" : "success"}>{isPreview(version) ? "Preview" : "Stable"}</Badge>
+        </div>
         <p>
           <a href={`https://github.com/chessvaultdotapp/chessvault/releases/tag/${encodeURIComponent(version)}`}>
             View release on GitHub
@@ -63,6 +71,15 @@ const entries = await Promise.all(
     max-width: 52rem;
     margin-inline: auto;
     overflow-wrap: anywhere;
+  }
+  .release-heading {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  nav li :global(.badge) {
+    margin-inline-start: 0.5rem;
   }
   article {
     margin-block: 3rem;

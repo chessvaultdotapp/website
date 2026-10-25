@@ -33,6 +33,9 @@ Development and builds then work offline; missing or stale snapshots fail with i
 `changelogs.json` is the integration contract for release automation: update `tag` and
 `commit` together in a PR when publishing a stable release or prerelease. The release
 snapshot must contain only versioned, published Markdown changelogs.
+Release badges follow Chessvault's naming convention: tags ending in a week-based
+suffix such as `+26w43b` are previews; plain version tags are stable releases.
+This is a Chessvault convention, not the SemVer meaning of build metadata.
 CI caches the checkout by commit and fetch-script version, then fetches and validates
 it before checks and builds. No network fetch happens inside the Astro build.
 
