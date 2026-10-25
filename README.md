@@ -10,6 +10,7 @@ Requires Node.js **22.12 or newer** and **pnpm**. Run commands from the reposito
 
 ```sh
 pnpm install --frozen-lockfile
+pnpm changelogs:fetch
 pnpm dev
 ```
 
@@ -20,6 +21,20 @@ The development server runs at `http://localhost:4321`.
 | `pnpm build` | Build the static site into `dist/` |
 | `pnpm preview` | Preview the production build locally |
 | `pnpm astro check` | Run Astro and TypeScript diagnostics |
+
+## Changelogs
+
+Run `pnpm changelogs:fetch` after cloning or updating `changelogs.json`. Git is required.
+The command uses a shallow, blob-filtered sparse checkout of the app repository's
+`changelogs/` directory at the pinned release tag and verifies its full commit SHA.
+Fetched files live in `.cache/chessvault/` and are not committed.
+Development and builds then work offline; missing or stale snapshots fail with instructions.
+
+`changelogs.json` is the integration contract for release automation: update `tag` and
+`commit` together in a PR when publishing a stable release or prerelease. The release
+snapshot must contain only versioned, published Markdown changelogs.
+CI caches the checkout by commit and fetch-script version, then fetches and validates
+it before checks and builds. No network fetch happens inside the Astro build.
 
 ## Project structure
 

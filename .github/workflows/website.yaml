@@ -35,6 +35,19 @@ jobs:
       - name: Install website dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Read changelog pin
+        id: changelog-pin
+        run: echo "commit=$(node -p 'require(\"./changelogs.json\").commit')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore changelog checkout
+        uses: actions/cache@3edfce9056124e459a23f683a21433670d47daca
+        with:
+          path: .cache/chessvault
+          key: changelogs-v1-${{ steps.changelog-pin.outputs.commit }}-${{ hashFiles('scripts/fetch-changelogs.ts') }}
+
+      - name: Fetch and validate pinned changelogs
+        run: pnpm changelogs:fetch
+
       - name: Check formatting
         run: pnpm exec oxfmt --check src astro.config.mjs playwright.config.ts tests
 
