@@ -14,6 +14,9 @@ for (const theme of ["light", "dark"] as const) {
     const release = page.locator("article").filter({ has: page.getByRole("heading", { name: pin.tag, exact: true }) });
     await expect(release).toBeVisible();
     await expect(release.locator(".release-notes")).not.toBeEmpty();
+    await expect(release.locator(".release-heading .badge")).toHaveText("Preview");
+    const stable = page.locator("article").filter({ has: page.getByRole("heading", { name: "v0.1.0", exact: true }) });
+    await expect(stable.locator(".release-heading .badge")).toHaveText("Stable");
     await expect(release.getByRole("link", { name: "View release on GitHub" })).toHaveAttribute(
       "href",
       `https://github.com/chessvaultdotapp/chessvault/releases/tag/${encodeURIComponent(pin.tag)}`,
