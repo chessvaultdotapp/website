@@ -20,6 +20,7 @@ for (const [path, heading] of [
   ["", "Chessvault"],
   ["docs/", "What is Chessvault?"],
   ["download/", "Download"],
+  ["changelog/", "Changelog"],
 ]) {
   test(`${path || "home"} loads`, async ({ page }) => {
     const response = await page.goto(path || "./");
@@ -37,6 +38,7 @@ test("header navigation reaches documentation, download, and home", async ({ pag
   for (const [label, path, heading] of [
     ["Documentation", "docs/", "What is Chessvault?"],
     ["Download", "download/", "Download"],
+    ["Changelog", "changelog/", "Changelog"],
     ["Chessvault", "", "Chessvault"],
   ]) {
     await header.getByRole("link", { name: label, exact: true }).click();

@@ -1,0 +1,86 @@
+---
+import { readFile, readdir } from "node:fs/promises";
+import { pathToFileURL } from "node:url";
+import { resolve } from "node:path";
+import { createMarkdownProcessor } from "@astrojs/markdown-remark";
+import Layout from "../layouts/Layout.astro";
+import pin from "../../changelogs.json";
+
+const directory = pathToFileURL(`${resolve(".cache/chessvault")}/`);
+let validated;
+try {
+  validated = JSON.parse(await readFile(new URL("validated.json", directory), "utf8"));
+} catch {
+  throw new Error("Changelogs are missing. Run pnpm changelogs:fetch before starting or building the website.");
+}
+if (validated.commit !== pin.commit || validated.tag !== pin.tag) {
+  throw new Error("Changelogs are stale. Run pnpm changelogs:fetch to update the pinned snapshot.");
+}
+const renderer = await createMarkdownProcessor();
+const files = (await readdir(new URL("changelogs/", directory))).filter((file) => file.endsWith(".md"));
+// Preview suffixes sort after their base stable version; newest versions appear first.
+files.sort((a, b) => b.localeCompare(a, "en", { numeric: true }));
+const entries = await Promise.all(
+  files.map(async (file) => {
+    const version = file.slice(0, -3);
+    const markdown = await readFile(new URL(`changelogs/${file}`, directory), "utf8");
+    const { code } = await renderer.render(markdown.replace(/^# .*(?:\r?\n|$)/, ""));
+    return { version, code };
+  }),
+);
+---
+
+<Layout title="Changelog | Chessvault">
+  <div class="changelog">
+    <h1>Changelog</h1>
+    <p>Release notes for Chessvault, including published development previews.</p>
+    <nav aria-label="Changelog versions">
+      <ul>
+        {entries.map(({ version }) => (
+          <li>
+            <a href={`#${version}`}>{version}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    {entries.map(({ version, code }) => (
+      <article id={version}>
+        <h2>{version}</h2>
+        <p>
+          <a href={`https://github.com/chessvaultdotapp/chessvault/releases/tag/${encodeURIComponent(version)}`}>
+            View release on GitHub
+          </a>
+        </p>
+        <div class="release-notes" set:html={code} />
+      </article>
+    ))}
+  </div>
+</Layout>
+
+<style>
+  .changelog {
+    width: 100%;
+    max-width: 52rem;
+    margin-inline: auto;
+    overflow-wrap: anywhere;
+  }
+  article {
+    margin-block: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+    scroll-margin-top: 1rem;
+  }
+  .release-notes :global(h2) {
+    font-size: 1.25rem;
+  }
+  .release-notes :global(li) {
+    margin-block: 0.5rem;
+  }
+  .release-notes :global(pre) {
+    overflow-x: auto;
+    padding: 1rem;
+  }
+  .release-notes :global(img) {
+    max-width: 100%;
+  }
+</style>
