@@ -12,7 +12,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "test:e2e": "playwright test",
-    "test:unit": "node --experimental-strip-types --test tests/fetch-changelogs.test.ts",
+    "test:unit": "node --experimental-strip-types --test tests/*.test.ts",
     "astro": "astro"
   },
   "dependencies": {
