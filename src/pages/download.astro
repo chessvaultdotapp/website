@@ -5,16 +5,22 @@ import Callout from "../components/Callout.astro";
 
 <Layout title="Download — Chessvault">
   <h1>Download</h1>
-  <Callout kind="warning" id="release-notice-title" title="No stable releases yet">
-    <p>Chessvault is still in development. A stable release is not yet available to download.</p>
-  </Callout>
-
   <Callout kind="info" id="platform-notice-title" title="Platform availability">
     <p id="platform-notice-message">
-      Development previews are currently available for Linux only. Windows and macOS support is planned. Mobile releases
-      are not currently being considered.
+      Stable releases and development previews are available for Linux only. Windows and macOS support is planned.
+      Mobile releases are not currently being considered.
     </p>
   </Callout>
+
+  <section class="stable-release" aria-labelledby="stable-release-title">
+    <h2 id="stable-release-title">Download for Linux</h2>
+    <p>Get the latest stable release. Choose a package for your system from the release assets.</p>
+    <p>
+      <a href="https://github.com/chessvaultdotapp/chessvault/releases/latest">
+        Download the latest stable release &rarr;
+      </a>
+    </p>
+  </section>
 
   <section class="development-previews" aria-labelledby="development-previews-title">
     <h2 id="development-previews-title">Try a Linux development preview</h2>
@@ -23,7 +29,9 @@ import Callout from "../components/Callout.astro";
       <strong>Development previews may contain bugs or incomplete features.</strong>
     </p>
     <p>
-      <a href="https://github.com/chessvaultdotapp/chessvault/releases">Browse Linux development previews &rarr;</a>
+      <a href="https://github.com/chessvaultdotapp/chessvault/releases?q=prerelease%3Atrue">
+        Browse Linux development previews &rarr;
+      </a>
     </p>
   </section>
 </Layout>
@@ -42,37 +50,41 @@ import Callout from "../components/Callout.astro";
   const title = document.querySelector("#platform-notice-title");
   const message = document.querySelector("#platform-notice-message");
 
+  const stableRelease = document.querySelector<HTMLElement>(".stable-release");
   const previews = document.querySelector<HTMLElement>(".development-previews");
   const isLinux = !isMobile && /Linux/i.test(platform || agent);
 
+  if (stableRelease) stableRelease.hidden = !isLinux;
   if (previews) previews.hidden = !isLinux;
 
   if (title && message) {
     if (isMobile) {
       title.textContent = "Mobile platforms are not supported";
       message.textContent =
-        "Releases for mobile platforms are not currently being considered. Development previews are available for Linux desktop only.";
+        "Releases for mobile platforms are not currently being considered. Stable releases and development previews are available for Linux desktop only.";
     } else if (/Windows|Win32|Win64/i.test(platform || agent)) {
       title.textContent = "Windows support is planned";
       message.textContent =
-        "Windows is not yet supported, but adding support is planned. Development previews are currently available for Linux only.";
+        "Windows is not yet supported, but adding support is planned. Stable releases and development previews are available for Linux only.";
     } else if (/macOS|Mac/i.test(platform || agent)) {
       title.textContent = "macOS support is planned";
       message.textContent =
-        "macOS is not yet supported, but adding support is planned. Development previews are currently available for Linux only.";
+        "macOS is not yet supported, but adding support is planned. Stable releases and development previews are available for Linux only.";
     } else if (/Linux/i.test(platform || agent)) {
-      title.textContent = "Development previews for Linux";
+      title.textContent = "Available for Linux";
       message.textContent =
-        "Linux development previews are available. Browse the releases below to choose a package for your system.";
+        "Linux stable releases and development previews are available. Choose a release below to download a package for your system.";
     }
   }
 </script>
 
 <style>
+  .stable-release,
   .development-previews {
     margin-block: 2rem;
   }
 
+  .stable-release p + p,
   .development-previews p + p {
     margin-top: 1rem;
   }

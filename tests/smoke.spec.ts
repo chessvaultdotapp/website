@@ -79,6 +79,36 @@ test("theme cycles and persists across navigation and reload", async ({ page }) 
   await expect(root).toHaveAttribute("data-theme", "dark");
 });
 
+for (const platform of ["Windows", "macOS", "Linux"]) {
+  test(`download options match ${platform} availability`, async ({ page }) => {
+    await page.addInitScript((platform) => {
+      Object.defineProperty(navigator, "userAgentData", {
+        value: { platform, mobile: false },
+        configurable: true,
+      });
+    }, platform);
+    await page.goto("download/");
+    for (const selector of [".stable-release", ".development-previews"]) {
+      if (platform === "Linux") {
+        await expect(page.locator(selector)).toBeVisible();
+      } else {
+        await expect(page.locator(selector)).toBeHidden();
+      }
+    }
+  });
+}
+
+test("downloads offer the latest stable release without a version pin", async ({ page }) => {
+  await page.goto("download/");
+  await expect(
+    page.getByRole("link", { name: "Download the latest stable release", includeHidden: true }),
+  ).toHaveAttribute("href", "https://github.com/chessvaultdotapp/chessvault/releases/latest");
+  await expect(page.getByText("No stable releases yet")).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "Browse Linux development previews", includeHidden: true }),
+  ).toHaveAttribute("href", "https://github.com/chessvaultdotapp/chessvault/releases?q=prerelease%3Atrue");
+});
+
 test("external links point to the intended destinations", async ({ page }) => {
   await page.goto("./");
   await expect(page.getByRole("link", { name: "GitHub", exact: true })).toHaveAttribute(
@@ -87,7 +117,6 @@ test("external links point to the intended destinations", async ({ page }) => {
   );
 
   for (const [path, label] of [
-    ["download/", "Browse Linux development previews"],
     ["docs/", "GitHub releases page"],
     ["docs/getting-started/", "GitHub releases page"],
   ]) {
